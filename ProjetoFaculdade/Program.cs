@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProjetoFaculdade.Data;
+using ProjetoFaculdade.Interface;
+using ProjetoFaculdade.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<Context>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
 var app = builder.Build();
 
