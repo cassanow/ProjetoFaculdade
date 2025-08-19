@@ -1,0 +1,95 @@
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using ProjetoFaculdade.DTO;
+using ProjetoFaculdade.Interface;
+using ProjetoFaculdade.Mapper;
+using ProjetoFaculdade.Models;
+
+namespace ProjetoFaculdade.Controllers;
+
+public class UsuarioController : Controller
+{
+    private readonly IUsuarioRepository _usuarioRepository;
+
+    public UsuarioController(IUsuarioRepository usuarioRepository)
+    {
+        _usuarioRepository = usuarioRepository;
+    }
+    
+    [HttpGet]
+    public IActionResult Registrar()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Registrar(Usuario usuario)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(usuario);
+        }
+
+        if (await _usuarioRepository.UsuarioExiste(usuario.Email))
+        {
+            return View(usuario);
+        }
+
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+        
+        await _usuarioRepository.Registrar(usuario);    
+        return RedirectToAction("Index", "Home");
+    }
+
+    [HttpGet]
+    public IActionResult Login()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Login(Usuario usuario)
+    {
+        var dto = MapeamentoUsuario.ToLogin(usuario);
+
+        if (!await _usuarioRepository.UsuarioExiste(dto.Email))
+        {
+            return View(dto);
+        }
+
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        if (dto.Email != usuario.Email && dto.Senha != usuario.Senha)
+        {
+            return View(dto);
+        }
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, dto.Email),
+            new Claim(ClaimTypes.Role, "Usuario")
+        };
+        
+        var claimsIdentity = new ClaimsIdentity(claims, "login");   
+        
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+        
+        return RedirectToAction("Index", "Home");
+      
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return RedirectToAction("Login", "Usuario");
+    }
+}

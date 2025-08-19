@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ProjetoFaculdade.Models;
 
 namespace ProjetoFaculdade.Data;
 
@@ -8,4 +9,6 @@ public class Context : DbContext
     {
         
     }
+    
+    public DbSet<Usuario> Usuarios { get; set; }
 }

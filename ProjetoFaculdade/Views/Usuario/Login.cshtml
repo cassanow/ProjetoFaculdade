@@ -1,0 +1,26 @@
+﻿@model ProjetoFaculdade.DTO.LoginDTO
+
+@{
+    ViewBag.Title = "title";
+    Layout = null;
+}
+
+
+<div class="container">
+    <h2>Login</h2>
+    <form asp-controller="Usuario" asp-action="Login" method="post" id="loginForm">
+        <div class="input-group">
+            <label asp-for="Email" for="email">Email</label>
+            <input asp-for="Senha" type="email" id="email" required>
+        </div>
+        <div class="input-group">
+            <label asp-for="Senha" for="password">Senha</label>
+            <input asp-for="Senha" type="password" id="password" required>
+        </div>
+        <button type="submit">Entrar</button>
+        <p>Ainda não tem conta? <a asp-controller="Usuario" asp-action="Registrar">Cadastre-se</a></p>
+    </form>
+</div>
+
+<script src="js/Login.js"></script>
+<link rel="stylesheet" href="/css/Login.css">   

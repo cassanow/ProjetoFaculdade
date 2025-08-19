@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using ProjetoFaculdade.Data;
+using ProjetoFaculdade.Interface;
+using ProjetoFaculdade.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<Context>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Usuario/Login";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    });
 
 var app = builder.Build();
 
@@ -24,7 +36,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllerRoute(
     name: "default",
