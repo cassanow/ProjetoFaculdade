@@ -53,21 +53,32 @@ public class UsuarioController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(Usuario usuario)
+    public async Task<IActionResult> Login(LoginDTO dto)
     {
-        var dto = MapeamentoUsuario.ToLogin(usuario);
-
-        if (!await _usuarioRepository.UsuarioExiste(dto.Email))
-        {
-            return View(dto);
-        }
-
         if (User.Identity.IsAuthenticated)
         {
             return RedirectToAction("Index", "Home");
         }
 
-        if (dto.Email != usuario.Email && dto.Senha != usuario.Senha)
+        if (!ModelState.IsValid)
+        {
+            return View(dto);
+        }
+        
+        var usuario = await _usuarioRepository.ObterUsuario(dto.Email);
+
+        if (usuario == null)
+        {
+            return View(dto);   
+        }
+
+        if (!await _usuarioRepository.UsuarioExiste(usuario.Email))
+        {
+            return View(dto);
+        }
+
+        if (dto.Email != usuario.Email || dto.Senha != usuario.Senha)
+            
         {
             return View(dto);
         }
@@ -78,7 +89,7 @@ public class UsuarioController : Controller
             new Claim(ClaimTypes.Role, "Usuario")
         };
         
-        var claimsIdentity = new ClaimsIdentity(claims, "login");   
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);   
         
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
         
