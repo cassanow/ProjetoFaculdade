@@ -8,6 +8,8 @@
 <div class="container">
     <h2>Cadastro</h2>
     <form asp-controller="Usuario" asp-action="Registrar" method="post" id="registerForm">
+        @Html.AntiForgeryToken()
+        
         <div class="input-group">
             <label asp-for="Nome" for="name">Nome</label>
             <input asp-for="Nome" type="text" id="name">
@@ -22,6 +24,9 @@
         </div>
         <button type="submit">Cadastrar</button>
         <p>Já possui uma conta? <a asp-controller="Usuario" asp-action="Login">Login</a></p>
+        <br/>
+
+        <div class="error-box" asp-validation-summary="All"></div>
     </form>
 </div>
 

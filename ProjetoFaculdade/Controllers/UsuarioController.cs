@@ -25,25 +25,27 @@ public class UsuarioController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Registrar(Usuario usuario)
     {
-        if (!ModelState.IsValid)
-        {
-            return View(usuario);
-        }
-
-        if (await _usuarioRepository.UsuarioExiste(usuario.Email))
-        {
-            return View(usuario);
-        }
 
         if (User.Identity.IsAuthenticated)
         {
             return RedirectToAction("ObterUsuarios", "Home");
         }
+
+        if (ModelState.IsValid && !await _usuarioRepository.UsuarioExiste(usuario.Email))
+        {
+            await _usuarioRepository.Registrar(usuario);
+            return RedirectToAction("ObterUsuarios", "Home");
+        }
+
+        if (await _usuarioRepository.UsuarioExiste(usuario.Email))
+        {
+            ModelState.AddModelError(string.Empty, "Email já cadastrado!");
+        }
         
-        await _usuarioRepository.Registrar(usuario);    
-        return RedirectToAction("ObterUsuarios", "Home");
+        return View(usuario);
     }
 
     [HttpGet]
@@ -56,46 +58,32 @@ public class UsuarioController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginDTO dto)
     {
+        var usuario = await _usuarioRepository.ObterUsuario(dto.Email);
+
         if (User.Identity.IsAuthenticated)
         {
             return RedirectToAction("ObterUsuarios", "Home");
         }
 
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid && usuario != null && usuario.Email == dto.Email && usuario.Senha == dto.Senha)
         {
-            return View(dto);
-        }
-        
-        var usuario = await _usuarioRepository.ObterUsuario(dto.Email);
-
-        if (usuario == null)
-        {
-            return View(dto);   
-        }
-
-        if (!await _usuarioRepository.UsuarioExiste(usuario.Email))
-        {
-            return View(dto);
-        }
-
-        if (dto.Email != usuario.Email || dto.Senha != usuario.Senha)
-        {
-            ModelState.AddModelError(string.Empty, "Email ou senha inválidos.");
-            return View(dto);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, usuario.Email),
+                new Claim(ClaimTypes.Role, "Usuario")
+            };
+            
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+            
+            return RedirectToAction("ObterUsuarios", "Home");
         }
 
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Email, dto.Email),
-            new Claim(ClaimTypes.Role, "Usuario")
-        };
-        
-        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);   
-        
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-        
-        return RedirectToAction("ObterUsuarios", "Home");
-      
+        ModelState.AddModelError(string.Empty, "Usuário ou senha incorretos");
+        return View(usuario);
     }
 
     [HttpPost]

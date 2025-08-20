@@ -1,4 +1,4 @@
-﻿@model ProjetoFaculdade.DTO.LoginDTO
+﻿@model Usuario
 
 @{
     ViewBag.Title = "title";
@@ -10,23 +10,25 @@
     <h2>Login</h2>
     <form asp-controller="Usuario" asp-action="Login" method="post" id="loginForm">
         @Html.AntiForgeryToken()
-
-
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         
+        <br/>
         <div class="input-group">
             <label asp-for="Email" for="email">Email</label>
             <input asp-for="Email" type="email" id="email">
-            <span asp-validation-for="Email" class="text-danger"></span>
         </div>
         <div class="input-group">
             <label asp-for="Senha" for="password">Senha</label>
             <input asp-for="Senha" type="password" id="password">
-            <span asp-validation-for="Senha" class="text-danger"></span>
         </div>
         <button type="submit">Entrar</button>
         <p>Ainda não tem conta? <a asp-controller="Usuario" asp-action="Registrar">Cadastre-se</a></p>
+        <br/>
+        
+        <div class="error-box" asp-validation-summary="All"></div>
+        
     </form>
+
+    
 </div>
 
 
