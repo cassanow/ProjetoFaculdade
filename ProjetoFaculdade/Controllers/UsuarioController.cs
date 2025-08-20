@@ -39,11 +39,11 @@ public class UsuarioController : Controller
 
         if (User.Identity.IsAuthenticated)
         {
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("ObterUsuarios", "Home");
         }
         
         await _usuarioRepository.Registrar(usuario);    
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("ObterUsuarios", "Home");
     }
 
     [HttpGet]
@@ -53,11 +53,12 @@ public class UsuarioController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginDTO dto)
     {
         if (User.Identity.IsAuthenticated)
         {
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("ObterUsuarios", "Home");
         }
 
         if (!ModelState.IsValid)
@@ -78,8 +79,8 @@ public class UsuarioController : Controller
         }
 
         if (dto.Email != usuario.Email || dto.Senha != usuario.Senha)
-            
         {
+            ModelState.AddModelError(string.Empty, "Email ou senha inválidos.");
             return View(dto);
         }
 
@@ -93,7 +94,7 @@ public class UsuarioController : Controller
         
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
         
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("ObterUsuarios", "Home");
       
     }
 

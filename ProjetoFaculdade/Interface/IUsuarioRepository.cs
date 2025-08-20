@@ -9,5 +9,7 @@ public interface IUsuarioRepository
     
     Task<bool> UsuarioExiste(string email);
     
-    Task<Usuario> ObterUsuario(string email);           
+    Task<Usuario> ObterUsuario(string email);         
+    
+    Task<List<Usuario>> ObterListaUsuarios();
 }

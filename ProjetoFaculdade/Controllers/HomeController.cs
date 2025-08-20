@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProjetoFaculdade.Interface;
 using ProjetoFaculdade.Models;
 
 namespace ProjetoFaculdade.Controllers;
@@ -8,16 +9,18 @@ namespace ProjetoFaculdade.Controllers;
 [Authorize(Roles = "Usuario")]
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly IUsuarioRepository _usuarioRepository;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(IUsuarioRepository usuarioRepository)
     {
-        _logger = logger;
+        _usuarioRepository = usuarioRepository;
     }
 
-    public IActionResult Index()
+    [HttpGet]
+    public async Task<IActionResult> ObterUsuarios()
     {
-        return View();
+        var usuarios = await _usuarioRepository.ObterListaUsuarios();
+        return View(usuarios);
     }
 
     public IActionResult Privacy()
@@ -25,9 +28,4 @@ public class HomeController : Controller
         return View();
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
 }

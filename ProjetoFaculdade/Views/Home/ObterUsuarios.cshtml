@@ -1,0 +1,22 @@
+﻿@model IEnumerable<ProjetoFaculdade.Models.Usuario>
+
+@{
+    ViewBag.Title = "Página Inicial";
+    Layout = null;
+}
+
+<div class="container">
+    <h2>Histórico de Visitas</h2>
+    <ul class="lista-usuarios">
+        @foreach (var usuario in Model)
+        {
+            <li>@usuario.Nome esteve aqui</li>
+        }
+    </ul>
+
+    <form asp-controller="Usuario" asp-action="Logout" method="post">
+        <button type="submit" class="logout-btn">Sair</button>
+    </form>
+</div>
+
+<link rel="stylesheet" href="/css/ObterUsuarios.css">   
