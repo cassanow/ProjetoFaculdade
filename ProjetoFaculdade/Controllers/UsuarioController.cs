@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoFaculdade.DTO;
 using ProjetoFaculdade.Interface;
@@ -19,13 +20,19 @@ public class UsuarioController : Controller
     }
     
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult Registrar()
     {
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("ObterUsuarios", "Home");
+        }
         return View();
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [AllowAnonymous]    
     public async Task<IActionResult> Registrar(Usuario usuario)
     {
 
@@ -51,6 +58,10 @@ public class UsuarioController : Controller
     [HttpGet]
     public IActionResult Login()
     {
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("ObterUsuarios", "Home");
+        }
         return View();
     }
 
